@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+        <context:component-scan base-package="com.ym" />
+        <aop:aspectj-autoproxy proxy-target-class="true"/>
+       	
+		<bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        		<property name="supportedMediaTypes">
+        			<list>
+        				<value>application/json;charset=UTF-8</value>
+        			</list>
+        		</property>
+        </bean>
+        <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        	<property name="messageConverters">
+        		<list>
+        			<ref bean="mappingJacksonHttpMessageConverter"/>
+        		</list>
+        	</property>
+        </bean>
+        
+        
+        <bean name="adminDao" class="com.ym.user.dao.impl.AdminDaoImpl" />
+        <bean name="adminService" class="com.ym.user.service.impl.AdminServiceImpl">
+        	<property name="adminDao" ref="adminDao" />
+        </bean>
+        
+        
+        <bean name="AopConfBean" class="com.ym.user.util.AopConfBean" />
+        <aop:config>
+        	<aop:aspect ref="AopConfBean">        	
+        		<aop:pointcut expression="execution(* com.ym.user.dao.impl.*.*(..))" id="test1"/>
+        		<aop:before pointcut-ref="test1" method="beforToDo"/>   <!-- 方法调用之前 -->
+        		<aop:after method="afterToDo" pointcut-ref="test1"/>	<!-- 方法调用之后 -->	
+        		<aop:after-returning method="retToDo" pointcut-ref="test1"/>	<!-- 方法成功执行之后 -->
+        		<aop:after-throwing method="excToDo" pointcut-ref="test1"/> <!-- 方法有异常 -->
+        	</aop:aspect>
+        </aop:config>
+        
+        
+</beans>
